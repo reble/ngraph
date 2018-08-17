@@ -33,6 +33,10 @@
 #include "ngraph/serializer.hpp"
 #include "ngraph/util.hpp"
 
+#ifdef NGRAPH_DISTRIBUTED
+#include "ngraph/distributed.hpp"
+#endif
+
 using namespace std;
 using namespace ngraph;
 
@@ -286,6 +290,10 @@ OPTIONS
 )###";
         return 1;
     }
+
+#ifdef NGRAPH_DISTRIBUTED
+    ngraph::Distributed dist;
+#endif
 
     vector<string> models;
     if (!directory.empty())

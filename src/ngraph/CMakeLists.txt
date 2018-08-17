@@ -154,15 +154,6 @@ set (SRC
     cpio.cpp
     )
 
-if(NGRAPH_DISTRIBUTED_ENABLE)
-    find_package(MPI REQUIRED)
-    add_definitions(-DNGRAPH_DISTRIBUTED)
-    include_directories(SYSTEM ${MPI_C_INCLUDE_PATH} ${MPI_CXX_INCLUDE_PATH})
-    link_directories(${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES})
-    link_libraries(${MPI_CXX_LIBRARIES})
-    set (SRC distributed.cpp ${SRC})
-endif()
-
 add_subdirectory(frontend)
 
 find_package(Graphviz QUIET)
@@ -185,6 +176,13 @@ target_compile_definitions(ngraph PRIVATE SHARED_LIB_EXT="${CMAKE_SHARED_LIBRARY
 set_target_properties(ngraph PROPERTIES VERSION ${NGRAPH_VERSION} SOVERSION ${NGRAPH_API_VERSION})
 target_link_libraries(ngraph PUBLIC libjson)
 target_compile_definitions(ngraph PUBLIC NGRAPH_VERSION="${NGRAPH_VERSION}")
+
+if(NGRAPH_DISTRIBUTED_ENABLE)
+    target_sources(ngraph PRIVATE distributed.cpp)
+    target_compile_definitions(ngraph PRIVATE NGRAPH_DISTRIBUTED)
+    target_include_directories(ngraph SYSTEM PRIVATE libmlsl)
+    target_link_libraries(ngraph PRIVATE libmlsl)
+endif()
 
 if (NGRAPH_ONNX_IMPORT_ENABLE)
     add_dependencies(ngraph onnx_import)

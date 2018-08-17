@@ -166,14 +166,6 @@ if (NGRAPH_CPU_ENABLE)
          message(WARNING "The build toolset doesn't support OpenMP. This will impact performance and lead to slowdowns.")
     endif()
 
-    if(NGRAPH_DISTRIBUTED_ENABLE)
-        find_package(MPI REQUIRED)
-        add_definitions(-DNGRAPH_DISTRIBUTED)
-        include_directories(SYSTEM ${MPI_C_INCLUDE_PATH} ${MPI_CXX_INCLUDE_PATH})
-        link_directories(${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES})
-        target_link_libraries(cpu_backend PRIVATE ${MPI_CXX_LIBRARIES})
-    endif()
-
     add_dependencies(cpu_backend ext_mkldnn ext_eigen)
     target_link_libraries(cpu_backend PUBLIC ngraph libmkldnn libeigen libjson libtbb)
     if (NOT NGRAPH_DEX_ONLY)
@@ -188,6 +180,12 @@ if (NGRAPH_CPU_ENABLE)
         # third-party library. -Bsymbolic-functions tells the linker to prefer the internal
         # version inside cpu_backend over what is available through the global symbol table
         set_property(TARGET cpu_backend APPEND PROPERTY LINK_FLAGS "-Wl,-Bsymbolic-functions")
+    endif()
+
+    if(NGRAPH_DISTRIBUTED_ENABLE)
+        target_compile_definitions(cpu_backend PRIVATE NGRAPH_DISTRIBUTED)
+        target_include_directories(cpu_backend SYSTEM PRIVATE libmlsl)
+        target_link_libraries(cpu_backend PRIVATE libmlsl)
     endif()
 
     install(TARGETS cpu_backend LIBRARY DESTINATION ${NGRAPH_INSTALL_LIB})

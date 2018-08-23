@@ -120,8 +120,8 @@ resources available for the breadth of ML/DL tasks.  We welcome ideas and
 `contributions`_ from the community.  
 
 
-Further project details can be found on our :doc:`project/about` page, or see 
-our :doc:`install` guide for how to get started.   
+Further project details can be found on our :doc:`../project/about` page, or see 
+our :doc:`../install` guide for how to get started.   
 
 
 .. note:: The library code is under active development as we're continually 
@@ -146,6 +146,7 @@ Contents
    framework-integration-guides.rst
    frameworks/index.rst
    fusion/index.rst
+   ngu/index.rst
    programmable/index.rst
    distr/index.rst
    python_api/index.rst

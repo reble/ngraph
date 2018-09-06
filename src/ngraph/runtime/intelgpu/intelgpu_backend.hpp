@@ -51,7 +51,9 @@ public:
 
     bool call(std::shared_ptr<Function> func,
               const std::vector<std::shared_ptr<runtime::TensorView>>& outputs,
-              const std::vector<std::shared_ptr<runtime::TensorView>>& inputs) override;
+              const std::vector<std::shared_ptr<runtime::TensorView>>& inputs,
+              std::function<void(void* user_data)> = 0,
+              void* user_data = nullptr) override;
 
 private:
     class FunctionInstance

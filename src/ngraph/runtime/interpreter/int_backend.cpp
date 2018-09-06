@@ -75,7 +75,9 @@ bool runtime::interpreter::INTBackend::compile(shared_ptr<Function> function)
 
 bool runtime::interpreter::INTBackend::call(shared_ptr<Function> function,
                                             const vector<shared_ptr<runtime::TensorView>>& outputs,
-                                            const vector<shared_ptr<runtime::TensorView>>& inputs)
+                                            const vector<shared_ptr<runtime::TensorView>>& inputs,
+                                            std::function<void(void* user_data)> callback,
+                                            void* user_data)
 {
     validate_call(function, outputs, inputs);
 
@@ -207,6 +209,11 @@ bool runtime::interpreter::INTBackend::call(shared_ptr<Function> function,
                 }
             }
         }
+    }
+
+    if (callback)
+    {
+        callback(user_data);
     }
 
     return true;

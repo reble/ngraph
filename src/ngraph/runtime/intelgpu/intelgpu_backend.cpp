@@ -1048,7 +1048,9 @@ bool runtime::intelgpu::IntelGPUBackend::compile(shared_ptr<Function> func)
 bool runtime::intelgpu::IntelGPUBackend::call(
     shared_ptr<Function> func,
     const vector<shared_ptr<runtime::TensorView>>& outputs,
-    const vector<shared_ptr<runtime::TensorView>>& inputs)
+    const vector<shared_ptr<runtime::TensorView>>& inputs,
+    std::function<void(void* user_data)> callback,
+    void* user_data)
 {
     validate_call(func, outputs, inputs);
 
@@ -1089,6 +1091,11 @@ bool runtime::intelgpu::IntelGPUBackend::call(
 
         auto result_memory = result.at(tensor_name).get_memory().pointer<char>();
         ngraph_res->write(result_memory.data(), 0, result_memory.size());
+    }
+
+    if (callback)
+    {
+        callback(user_data);
     }
 
     return true;

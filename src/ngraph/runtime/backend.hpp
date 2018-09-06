@@ -88,7 +88,9 @@ public:
     /// \returns true if iteration is successful, false otherwise
     virtual bool call(std::shared_ptr<Function> func,
                       const std::vector<std::shared_ptr<runtime::TensorView>>& outputs,
-                      const std::vector<std::shared_ptr<runtime::TensorView>>& inputs) = 0;
+                      const std::vector<std::shared_ptr<runtime::TensorView>>& inputs,
+                      std::function<void(void* user_data)> = 0,
+                      void* user_data = nullptr) = 0;
 
     /// \brief Executes a single iteration of a Function. If func is not compiled the call will
     ///     compile it. Optionally validates the inputs and outputs against the function graph.

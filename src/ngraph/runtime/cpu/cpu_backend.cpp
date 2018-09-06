@@ -89,7 +89,9 @@ bool runtime::cpu::CPU_Backend::compile(shared_ptr<Function> func)
 
 bool runtime::cpu::CPU_Backend::call(shared_ptr<Function> func,
                                      const vector<shared_ptr<runtime::TensorView>>& outputs,
-                                     const vector<shared_ptr<runtime::TensorView>>& inputs)
+                                     const vector<shared_ptr<runtime::TensorView>>& inputs,
+                                     std::function<void(void* user_data)> callback,
+                                     void* user_data)
 {
     bool rc = true;
 
@@ -100,6 +102,11 @@ bool runtime::cpu::CPU_Backend::call(shared_ptr<Function> func,
     }
 
     instance.m_call_frame->call(outputs, inputs);
+
+    if (callback)
+    {
+        callback(user_data);
+    }
 
     return rc;
 }

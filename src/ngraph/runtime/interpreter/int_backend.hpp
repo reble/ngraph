@@ -147,7 +147,9 @@ public:
 
     bool call(std::shared_ptr<Function> function,
               const std::vector<std::shared_ptr<TensorView>>& outputs,
-              const std::vector<std::shared_ptr<TensorView>>& intputs) override;
+              const std::vector<std::shared_ptr<TensorView>>& intputs,
+              std::function<void(void* user_data)> = 0,
+              void* user_data = nullptr) override;
 
     void set_nan_check(std::shared_ptr<Function> func, bool);
 

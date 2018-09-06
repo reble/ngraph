@@ -129,7 +129,9 @@ bool runtime::gpu::GPU_Backend::compile(shared_ptr<Function> func)
 
 bool runtime::gpu::GPU_Backend::call(shared_ptr<Function> func,
                                      const vector<shared_ptr<runtime::TensorView>>& outputs,
-                                     const vector<shared_ptr<runtime::TensorView>>& inputs)
+                                     const vector<shared_ptr<runtime::TensorView>>& inputs,
+                                     std::function<void(void* user_data)> callback,
+                                     void* user_data)
 {
     bool rc = true;
 
@@ -144,6 +146,11 @@ bool runtime::gpu::GPU_Backend::call(shared_ptr<Function> func,
     // ensure the GPURuntimeContext primitive pointers are valid
     m_context->prepare_runtime_context();
     instance.m_call_frame->call(outputs, inputs, m_context->m_runtime_context.get());
+
+    if (callback)
+    {
+        callback(user_data);
+    }
 
     return rc;
 }

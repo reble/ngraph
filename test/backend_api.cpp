@@ -18,6 +18,8 @@
 #include "ngraph/ngraph.hpp"
 #include "ngraph/runtime/backend.hpp"
 #include "ngraph/util.hpp"
+#include "util/ndarray.hpp"
+#include "util/test_tools.hpp"
 
 using namespace std;
 using namespace ngraph;
@@ -33,4 +35,32 @@ TEST(backend_api, registered_devices)
 TEST(backend_api, invalid_name)
 {
     ASSERT_ANY_THROW(ngraph::runtime::Backend::create("COMPLETELY-BOGUS-NAME"));
+}
+
+TEST(backend_api, async_call)
+{
+    Shape shape{2, 2};
+    auto A = make_shared<op::Parameter>(element::f32, shape);
+    auto B = make_shared<op::Parameter>(element::f32, shape);
+    auto f = make_shared<Function>(make_shared<op::Add>(A, B), op::ParameterVector{A, B});
+    shared_ptr<runtime::Backend> backend = runtime::Backend::create("INTERPRETER");
+
+    // Create some tensors for input/output
+    shared_ptr<runtime::TensorView> a = backend->create_tensor(element::f32, shape);
+    shared_ptr<runtime::TensorView> b = backend->create_tensor(element::f32, shape);
+    shared_ptr<runtime::TensorView> result = backend->create_tensor(element::f32, shape);
+
+    copy_data(a, test::NDArray<float, 2>({{1, 2}, {3, 4}}).get_vector());
+    copy_data(b, test::NDArray<float, 2>({{5, 6}, {7, 8}}).get_vector());
+
+    string test_result;
+    string s = "hello world";
+    char callback_data[100];
+    strncpy(callback_data, s.c_str(), s.size());
+    backend->call(f,
+                  {result},
+                  {a, b},
+                  [&](void* user_data) { test_result = reinterpret_cast<char*>(user_data); },
+                  callback_data);
+    NGRAPH_INFO << test_result;
 }

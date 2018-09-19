@@ -21,6 +21,8 @@
 
 #include "ngraph/file_util.hpp"
 #include "ngraph/ngraph.hpp"
+#include "ngraph/pass/dump_sorted.hpp"
+#include "ngraph/pass/manager.hpp"
 #include "ngraph/serializer.hpp"
 #include "ngraph/util.hpp"
 #include "nlohmann/json.hpp"
@@ -172,4 +174,17 @@ TEST(benchmark, serialize)
     shared_ptr<Function> f = ngraph::deserialize(json_string);
     timer.stop();
     cout << "deserialize took " << timer.get_milliseconds() << "ms\n";
+}
+
+TEST(serialize, dump_graph)
+{
+    stopwatch timer;
+    string model = "mxnet/LSTM_backward.json";
+    const string json_path = file_util::path_join(SERIALIZED_ZOO, model);
+    string dump_filename = "dump.txt";
+    shared_ptr<Function> func = deserialize(json_path);
+
+    pass::Manager pass_manager;
+    pass_manager.register_pass<pass::DumpSorted>(dump_filename);
+    pass_manager.run_passes(func);
 }

@@ -41,31 +41,32 @@ bool pass::DumpSorted::run_on_module(vector<shared_ptr<Function>>& functions)
             out << "=====================================================================\n";
             for (const shared_ptr<Node>& node : f->get_ordered_ops())
             {
-                out << node->get_name() << "(";
-                vector<string> inputs;
-                for (const descriptor::Input& input : node->get_inputs())
-                {
-                    inputs.push_back(input.get_tensor().get_name());
-                }
-                out << join(inputs);
-                out << ") -> ";
+                out << *node << "\n";
+                // out << node->get_name() << "(";
+                // vector<string> inputs;
+                // for (const descriptor::Input& input : node->get_inputs())
+                // {
+                //     inputs.push_back(input.get_tensor().get_name());
+                // }
+                // out << join(inputs);
+                // out << ") -> ";
 
-                vector<string> outputs;
-                for (size_t i = 0; i < node->get_output_size(); ++i)
-                {
-                    outputs.push_back(node->get_output_tensor(i).get_name());
-                }
-                out << join(outputs);
-                out << "\n";
+                // vector<string> outputs;
+                // for (size_t i = 0; i < node->get_output_size(); ++i)
+                // {
+                //     outputs.push_back(node->get_output_tensor(i).get_name());
+                // }
+                // out << join(outputs);
+                // out << "\n";
 
-                for (const descriptor::Tensor* tensor : node->liveness_new_list)
-                {
-                    out << "    N " << tensor->get_name() << "\n";
-                }
-                for (const descriptor::Tensor* tensor : node->liveness_free_list)
-                {
-                    out << "    F " << tensor->get_name() << "\n";
-                }
+                // for (const descriptor::Tensor* tensor : node->liveness_new_list)
+                // {
+                //     out << "    N " << tensor->get_name() << "\n";
+                // }
+                // for (const descriptor::Tensor* tensor : node->liveness_free_list)
+                // {
+                //     out << "    F " << tensor->get_name() << "\n";
+                // }
             }
             out << "=====================================================================\n";
             out << f->get_name() << " end\n";

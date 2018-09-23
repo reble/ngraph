@@ -39,12 +39,12 @@ vector<string> runtime::Backend::get_registered_devices()
     return BackendManager::get_registered_backends();
 }
 
-void runtime::Backend::remove_compiled_function(shared_ptr<Function> func)
+void runtime::Backend::remove_compiled_function(void* handle)
 {
 }
 
 vector<ngraph::runtime::PerformanceCounter>
-    runtime::Backend::get_performance_data(shared_ptr<Function> func) const
+    runtime::Backend::get_performance_data(void* handle) const
 {
     return vector<PerformanceCounter>();
 }

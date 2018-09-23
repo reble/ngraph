@@ -146,17 +146,16 @@ public:
     std::shared_ptr<TensorView> create_tensor(const element::Type& type,
                                               const Shape& shape) override;
 
-    bool compile(std::shared_ptr<Function> function) override;
+    void* compile(std::shared_ptr<Function> function) override;
 
-    bool call(std::shared_ptr<Function> function,
+    bool call(void* handle,
               const std::vector<std::shared_ptr<TensorView>>& outputs,
               const std::vector<std::shared_ptr<TensorView>>& intputs) override;
 
-    void set_nan_check(std::shared_ptr<Function> func, bool);
+    void set_nan_check(void* handle, bool);
 
-    void enable_performance_data(std::shared_ptr<Function> func, bool enable) override;
-    std::vector<PerformanceCounter>
-        get_performance_data(std::shared_ptr<Function> func) const override;
+    void enable_performance_data(void* handle, bool enable) override;
+    std::vector<PerformanceCounter> get_performance_data(void* handle) const override;
 
 private:
     class FunctionInstance
@@ -166,9 +165,18 @@ private:
         bool m_nan_check_enabled = false;
         bool m_performance_counters_enabled = false;
         std::unordered_map<const Node*, stopwatch> m_timer_map;
+        std::shared_ptr<Function> m_function;
         std::vector<NodeWrapper> m_wrapped_nodes;
     };
     std::map<std::shared_ptr<Function>, FunctionInstance> m_function_map;
+
+    bool call(std::shared_ptr<Function> func,
+              const std::vector<std::shared_ptr<TensorView>>& outputs,
+              const std::vector<std::shared_ptr<TensorView>>& intputs);
+
+    bool call(FunctionInstance& instance,
+              const std::vector<std::shared_ptr<TensorView>>& outputs,
+              const std::vector<std::shared_ptr<TensorView>>& intputs);
 
     static void perform_nan_check(const std::vector<std::shared_ptr<HostTensorView>>&,
                                   const Node* op = nullptr);

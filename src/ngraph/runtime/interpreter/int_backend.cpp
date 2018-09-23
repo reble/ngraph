@@ -58,12 +58,13 @@ shared_ptr<runtime::TensorView> runtime::interpreter::INTBackend::create_tensor(
     return make_shared<runtime::HostTensorView>(type, shape, memory_pointer, "external");
 }
 
-bool runtime::interpreter::INTBackend::compile(shared_ptr<Function> function)
+void* runtime::interpreter::INTBackend::compile(shared_ptr<Function> function)
 {
     FunctionInstance& instance = m_function_map[function];
     if (!instance.m_is_compiled)
     {
         instance.m_is_compiled = true;
+        instance.m_function = function;
         pass::Manager pass_manager;
         pass_manager.register_pass<pass::LikeReplacement>();
         pass_manager.register_pass<pass::AssignLayout<DenseTensorLayout>>();
@@ -76,6 +77,17 @@ bool runtime::interpreter::INTBackend::compile(shared_ptr<Function> function)
         }
     }
 
+    return &instance;
+}
+bool runtime::interpreter::INTBackend::call(void* handle,
+                                            const vector<shared_ptr<runtime::TensorView>>& outputs,
+                                            const vector<shared_ptr<runtime::TensorView>>& inputs)
+{
+    if (handle)
+    {
+        FunctionInstance& instance = reinterpret_cast<FunctionInstance&>(handle);
+        call(instance, outputs, inputs);
+    }
     return true;
 }
 
@@ -83,12 +95,20 @@ bool runtime::interpreter::INTBackend::call(shared_ptr<Function> function,
                                             const vector<shared_ptr<runtime::TensorView>>& outputs,
                                             const vector<shared_ptr<runtime::TensorView>>& inputs)
 {
-    validate_call(function, outputs, inputs);
-
-    compile(function);
     FunctionInstance& instance = m_function_map[function];
+    if (!instance.m_is_compiled)
+    {
+        call(instance, outputs, inputs);
+    }
+    return true;
+}
 
+bool runtime::interpreter::INTBackend::call(FunctionInstance& instance,
+                                            const vector<shared_ptr<runtime::TensorView>>& outputs,
+                                            const vector<shared_ptr<runtime::TensorView>>& inputs)
+{
     // convert inputs to HostTensorView
+    Function* function = instance.m_function.get();
     vector<shared_ptr<runtime::HostTensorView>> func_inputs;
     for (auto tv : inputs)
     {
@@ -278,29 +298,37 @@ void runtime::interpreter::INTBackend::generate_calls(
     }
 }
 
-void runtime::interpreter::INTBackend::set_nan_check(shared_ptr<Function> func, bool enable)
+void runtime::interpreter::INTBackend::set_nan_check(void* handle, bool enable)
 {
-    FunctionInstance& instance = m_function_map[func];
-    instance.m_nan_check_enabled = enable;
+    if (handle)
+    {
+        FunctionInstance& instance = reinterpret_cast<FunctionInstance&>(handle);
+        instance.m_nan_check_enabled = enable;
+    }
 }
 
-void runtime::interpreter::INTBackend::enable_performance_data(shared_ptr<Function> func,
-                                                               bool enable)
+void runtime::interpreter::INTBackend::enable_performance_data(void* handle, bool enable)
 {
-    FunctionInstance& instance = m_function_map[func];
-    instance.m_performance_counters_enabled = enable;
+    if (handle)
+    {
+        FunctionInstance& instance = reinterpret_cast<FunctionInstance&>(handle);
+        instance.m_performance_counters_enabled = enable;
+    }
 }
 
 vector<runtime::PerformanceCounter>
-    runtime::interpreter::INTBackend::get_performance_data(shared_ptr<Function> func) const
+    runtime::interpreter::INTBackend::get_performance_data(void* handle) const
 {
     vector<runtime::PerformanceCounter> rc;
-    const FunctionInstance& instance = m_function_map.at(func);
-    for (const pair<const Node*, stopwatch> p : instance.m_timer_map)
+    if (handle)
     {
-        rc.emplace_back(p.first->get_name().c_str(),
-                        p.second.get_total_microseconds(),
-                        p.second.get_call_count());
+        FunctionInstance& instance = reinterpret_cast<FunctionInstance&>(handle);
+        for (const pair<const Node*, stopwatch> p : instance.m_timer_map)
+        {
+            rc.emplace_back(p.first->get_name().c_str(),
+                            p.second.get_total_microseconds(),
+                            p.second.get_call_count());
+        }
     }
     return rc;
 }

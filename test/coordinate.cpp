@@ -69,3 +69,30 @@ TEST(coordinate, shape3d)
     EXPECT_EQ(*it++, Coordinate({1, 2, 3}));
     EXPECT_TRUE(it == ct.end());
 }
+
+// CoordinateTransform(const Shape& source_shape,
+//                     const Coordinate& source_start_corner,
+//                     const Coordinate& source_end_corner,
+//                     const Strides& source_strides,
+//                     const AxisVector& source_axis_order,
+//                     const CoordinateDiff& target_padding_below,
+//                     const CoordinateDiff& target_padding_above,
+//                     const Strides& source_dilation_strides);
+
+TEST(coordinate, default)
+{
+    Shape source_shape{10, 10};
+    Coordinate source_start_corner = Coordinate(source_shape.size(), 0);
+    Coordinate source_end_corner{source_shape};
+    Strides source_strides;
+    AxisVector source_axis_order;
+    CoordinateDiff target_padding_below;
+    CoordinateDiff target_padding_above;
+    Strides source_dilation_strides;
+
+    auto ct = CoordinateTransform(source_shape, source_start_corner, source_end_corner);
+    for (const Coordinate& c : ct)
+    {
+        cout << c << endl;
+    }
+}

@@ -23,6 +23,7 @@
 #include "ngraph/coordinate_diff.hpp"
 #include "ngraph/coordinate_transform.hpp"
 #include "ngraph/except.hpp"
+#include "ngraph/log.hpp"
 #include "ngraph/shape.hpp"
 #include "ngraph/strides.hpp"
 #include "ngraph/util.hpp"
@@ -46,6 +47,14 @@ CoordinateTransform::CoordinateTransform(const Shape& source_shape,
     , m_target_padding_above(target_padding_above)
     , m_target_dilation_strides(target_dilation_strides)
 {
+    NGRAPH_INFO << m_source_shape;
+    NGRAPH_INFO << m_source_start_corner;
+    NGRAPH_INFO << m_source_end_corner;
+    NGRAPH_INFO << m_source_strides;
+    NGRAPH_INFO << m_source_axis_order;
+    NGRAPH_INFO << m_target_padding_below;
+    NGRAPH_INFO << m_target_padding_above;
+    NGRAPH_INFO << m_target_dilation_strides;
     m_n_axes = source_shape.size();
 
     if (m_n_axes != source_start_corner.size())

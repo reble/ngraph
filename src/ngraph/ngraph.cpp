@@ -18,6 +18,8 @@
 
 /// \brief This file is for static initialization of the ngraph shared library
 
+extern "C" int __llvm_profile_runtime();
+
 namespace ngraph
 {
     class StaticInitializer;

@@ -226,14 +226,6 @@ add_custom_target(style-check
     COMMAND ${PROJECT_SOURCE_DIR}/maint/check-code-format.sh
 )
 
-if (NGRAPH_CODE_COVERAGE_ENABLE)
-    # LLVM_PROFILE_FILE="ngraph.profraw" test/unit-test
-    # llvm-profdata-3.9 merge -sparse ngraph.profraw -o ngraph.profdata
-    # llvm-cov-3.9 show test/unit-test -instr-profile=ngraph.profdata
-    message(STATUS "Code coverage enabled")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
-endif()
-
 #-----------------------------------------------------------------------------------------------
 # enable or disable output from NGRAPH_DEBUG statements
 #-----------------------------------------------------------------------------------------------

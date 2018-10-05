@@ -55,6 +55,24 @@ CoordinateTransform::CoordinateTransform(const Shape& source_shape,
     NGRAPH_INFO << m_target_padding_below;
     NGRAPH_INFO << m_target_padding_above;
     NGRAPH_INFO << m_target_dilation_strides;
+    std::vector<size_t> st(source_shape.size() - 1);
+    size_t scale = 1;
+    for (size_t i = source_shape.size() - 1; i != 0; i--)
+    {
+        scale *= source_shape[i];
+        st[i - 1] = scale;
+    }
+    NGRAPH_INFO << join(st);
+    size_t index = 33;
+    Coordinate c;
+    for (size_t x : st)
+    {
+        c.push_back(index / x);
+        index = index % x;
+    }
+    c.push_back(index);
+    NGRAPH_INFO << c;
+
     m_n_axes = source_shape.size();
 
     if (m_n_axes != source_start_corner.size())

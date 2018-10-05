@@ -211,3 +211,36 @@ TEST(coordinate, dilation)
         cout << c << endl;
     }
 }
+
+TEST(benchmark, coordinate)
+{
+    // Shape source_shape{128, 3, 2000, 1000};
+    Shape source_shape{2, 3, 4, 5};
+    Coordinate source_start_corner = Coordinate{0, 0, 0, 0};
+    Coordinate source_end_corner{source_shape};
+    Strides source_strides = Strides(source_shape.size(), 1);
+    AxisVector source_axis_order(source_shape.size());
+    iota(source_axis_order.begin(), source_axis_order.end(), 0);
+    CoordinateDiff target_padding_below = CoordinateDiff(source_shape.size(), 0);
+    CoordinateDiff target_padding_above = CoordinateDiff(source_shape.size(), 0);
+    Strides source_dilation_strides = Strides(source_shape.size(), 1);
+
+    stopwatch timer;
+    timer.start();
+    auto ct = CoordinateTransform(source_shape,
+                                  source_start_corner,
+                                  source_end_corner,
+                                  source_strides,
+                                  source_axis_order,
+                                  target_padding_below,
+                                  target_padding_above,
+                                  source_dilation_strides);
+
+    int i = 0;
+    for (const Coordinate& c : ct)
+    {
+        // NGRAPH_INFO << i++ << ", " << c;
+    }
+    timer.stop();
+    cout << "time: " << timer.get_milliseconds() << endl;
+}

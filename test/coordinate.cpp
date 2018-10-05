@@ -92,6 +92,14 @@ TEST(coordinate, shape3d)
     EXPECT_TRUE(it == ct.end());
 }
 
+TEST(coordinate, zero_sized_axis)
+{
+    auto ct = CoordinateTransform({2, 0, 4});
+    ASSERT_EQ(shape_size(ct.get_target_shape()), 0);
+    auto it = ct.begin();
+    EXPECT_TRUE(it == ct.end());
+}
+
 TEST(DISABLED_coordinate, random)
 {
     auto ct = CoordinateTransform({2, 3, 4});
@@ -233,7 +241,7 @@ TEST(coordinate, axis_order)
     EXPECT_TRUE(it == ct.end());
 }
 
-TEST(coordinate, padding)
+TEST(DISABLED_coordinate, padding)
 {
     Shape source_shape{10, 10};
     Coordinate source_start_corner = Coordinate{0, 0};
@@ -265,7 +273,7 @@ TEST(coordinate, padding)
     EXPECT_TRUE(it == ct.end());
 }
 
-TEST(coordinate, dilation)
+TEST(DISABLED_coordinate, dilation)
 {
     Shape source_shape{10, 10};
     Coordinate source_start_corner = Coordinate{0, 0};

@@ -169,14 +169,14 @@ CoordinateTransform::CoordinateTransform(const Shape& source_shape,
                                           source_strides[source_axis_order[axis]]));
     }
 
-    m_mapping_strides = std::vector<size_t>(source_shape.size() - 1);
-    size_t scale = 1;
-    for (size_t i = source_shape.size() - 1; i != 0; i--)
-    {
-        scale *= source_shape[i];
-        m_mapping_strides[i - 1] = scale;
-    }
-    NGRAPH_INFO << join(m_mapping_strides);
+    // m_mapping_strides = std::vector<size_t>(source_shape.size() - 1);
+    // size_t scale = 1;
+    // for (size_t i = source_shape.size() - 1; i != 0; i--)
+    // {
+    //     scale *= source_shape[i];
+    //     m_mapping_strides[i - 1] = scale;
+    // }
+    // NGRAPH_INFO << join(m_mapping_strides);
     // size_t index = 33;
     // Coordinate c;
     // for (size_t x : m_mapping_strides)
@@ -397,8 +397,11 @@ const Shape& CoordinateTransform::get_target_shape() const
 }
 
 // The "is_end" parameter is true if we want the "end()" iterator.
-CoordinateTransform::Iterator::Iterator(const Shape& target_shape, bool is_end)
+CoordinateTransform::Iterator::Iterator(const Shape& target_shape,
+                                        const Strides& mapping_strides,
+                                        bool is_end)
     : m_target_shape(target_shape)
+    , m_mapping_strides(mapping_strides)
 {
     // Initial coordinate is (0,...,0) in the target space.
     m_coordinate = Coordinate(target_shape.size(), 0);

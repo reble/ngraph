@@ -75,7 +75,7 @@ namespace ngraph
         class Iterator
         {
         public:
-            Iterator(const Shape& target_shape, bool is_end = false);
+            Iterator(const Shape& target_shape, const Strides& mapping, bool is_end = false);
 
             void operator++();
             Iterator operator++(int);
@@ -86,13 +86,14 @@ namespace ngraph
 
         private:
             Shape m_target_shape;
+            Strides m_mapping_strides;
             Coordinate m_coordinate;
             bool m_oob;
             bool m_empty;
         };
 
-        Iterator begin() noexcept { return Iterator(m_target_shape); }
-        Iterator end() noexcept { return Iterator(m_target_shape, true); }
+        Iterator begin() noexcept { return Iterator(m_target_shape, m_mapping_strides); }
+        Iterator end() noexcept { return Iterator(m_target_shape, m_mapping_strides, true); }
     private:
         size_t index_source(const Coordinate& c) const;
         static Strides default_strides(size_t n_axes);
@@ -109,7 +110,7 @@ namespace ngraph
         CoordinateDiff m_target_padding_below;
         CoordinateDiff m_target_padding_above;
         Strides m_target_dilation_strides;
-        std::vector<size_t> m_mapping_strides;
+        Strides m_mapping_strides;
 
         Shape m_target_shape;
         size_t m_n_axes;

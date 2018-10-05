@@ -26,7 +26,6 @@
 #include "ngraph/log.hpp"
 #include "ngraph/shape.hpp"
 #include "ngraph/strides.hpp"
-#include "ngraph/util.hpp"
 
 using namespace ngraph;
 
@@ -392,27 +391,10 @@ const Shape& CoordinateTransform::get_target_shape() const
 CoordinateTransform::Iterator::Iterator(const Shape& target_shape,
                                         const Strides& mapping_strides,
                                         bool is_end)
-    : m_target_shape(target_shape)
-    , m_mapping_strides(mapping_strides)
+    : m_mapping_strides(mapping_strides)
+    , m_coordinate(target_shape)
     , m_index(is_end ? shape_size(target_shape) : 0)
 {
-    // Initial coordinate is (0,...,0) in the target space.
-    m_coordinate = Coordinate(target_shape.size(), 0);
-
-    // The case where we have a zero-length axis is a bit special, in that
-    // the iterator always starts out of bounds.
-    m_empty = false;
-
-    for (auto s : target_shape)
-    {
-        if (s == 0)
-        {
-            m_empty = true;
-            break;
-        }
-    }
-
-    m_oob = is_end || m_empty;
 }
 
 CoordinateTransform::Iterator& CoordinateTransform::Iterator::operator++()
@@ -420,34 +402,6 @@ CoordinateTransform::Iterator& CoordinateTransform::Iterator::operator++()
     m_index++;
     recompute_coordinate();
     return *this;
-    // // If we are out of bounds, start over at (0,...0). (TODO: not sure if that's what we want. It
-    // // might be best to stay put?)
-    // if (m_oob)
-    // {
-    //     std::fill(m_coordinate.begin(), m_coordinate.end(), 0);
-    //     m_oob = m_empty;
-    //     return;
-    // }
-
-    // // Increment the target coordinate.
-    // for (size_t axis = m_target_shape.size(); axis-- > 0;)
-    // {
-    //     m_coordinate[axis]++;
-
-    //     if (m_coordinate[axis] < m_target_shape[axis])
-    //     {
-    //         // No carry-out, so we are done.
-    //         return;
-    //     }
-    //     else
-    //     {
-    //         m_coordinate[axis] = 0;
-    //     }
-    // }
-
-    // // If we are still here there was carry-out from the most significant axis. We are now out of
-    // // bounds.
-    // m_oob = true;
 }
 
 void CoordinateTransform::Iterator::recompute_coordinate()
@@ -458,9 +412,8 @@ void CoordinateTransform::Iterator::recompute_coordinate()
         size_t placement_index = 0;
         for (size_t x : m_mapping_strides)
         {
-            size_t value = index / x;
+            m_coordinate[placement_index++] = index / x;
             index = index % x;
-            m_coordinate[placement_index++] = value;
         }
         m_coordinate[placement_index] = index;
     }

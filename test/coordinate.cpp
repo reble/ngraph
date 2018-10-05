@@ -331,11 +331,9 @@ TEST(benchmark, coordinate)
                                   target_padding_above,
                                   source_dilation_strides);
 
-    int i = 0;
     for (const Coordinate& c : ct)
     {
-        // NGRAPH_INFO << i++ << ", " << c;
-        // cout << ct.to_source_coordinate(c) << endl;
+        (void)c;
     }
     timer.stop();
     cout << "time: " << timer.get_milliseconds() << endl;

@@ -21,6 +21,7 @@
 #include "ngraph/coordinate_diff.hpp"
 #include "ngraph/shape.hpp"
 #include "ngraph/strides.hpp"
+#include "ngraph/util.hpp"
 
 namespace ngraph
 {
@@ -83,15 +84,13 @@ namespace ngraph
             const Coordinate& operator*() const;
             bool operator!=(const Iterator& it);
             bool operator==(const Iterator& it);
-
+            const stopwatch& get_timer() { return m_timer; }
         private:
             void recompute_coordinate();
-            Shape m_target_shape;
             Strides m_mapping_strides;
             Coordinate m_coordinate;
-            bool m_oob;
-            bool m_empty;
             size_t m_index;
+            stopwatch m_timer;
         };
 
         Iterator begin() noexcept { return Iterator(m_target_shape, m_mapping_strides); }

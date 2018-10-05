@@ -86,7 +86,6 @@ namespace ngraph
 
         private:
             Shape m_target_shape;
-            Shape m_axis_walk_order;
             Coordinate m_coordinate;
             bool m_oob;
             bool m_empty;
@@ -110,6 +109,7 @@ namespace ngraph
         CoordinateDiff m_target_padding_below;
         CoordinateDiff m_target_padding_above;
         Strides m_target_dilation_strides;
+        std::vector<size_t> m_mapping_strides;
 
         Shape m_target_shape;
         size_t m_n_axes;

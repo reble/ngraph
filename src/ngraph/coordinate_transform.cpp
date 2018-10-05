@@ -47,33 +47,6 @@ CoordinateTransform::CoordinateTransform(const Shape& source_shape,
     , m_target_padding_above(target_padding_above)
     , m_target_dilation_strides(target_dilation_strides)
 {
-    // NGRAPH_INFO << m_source_shape;
-    // NGRAPH_INFO << m_source_start_corner;
-    // NGRAPH_INFO << m_source_end_corner;
-    // NGRAPH_INFO << m_source_strides;
-    // NGRAPH_INFO << m_source_axis_order;
-    // NGRAPH_INFO << m_target_padding_below;
-    // NGRAPH_INFO << m_target_padding_above;
-    // NGRAPH_INFO << m_target_dilation_strides;
-    // std::vector<size_t> st(source_shape.size() - 1);
-    // size_t scale = 1;
-    // for (size_t i = source_shape.size() - 1; i != 0; i--)
-    // {
-    //     scale *= source_shape[i];
-    //     st[i - 1] = scale;
-    // }
-    // NGRAPH_INFO << join(st);
-    // size_t index = 33;
-    // Coordinate c;
-    // for (size_t x : st)
-    // {
-    //     size_t value = index / x;
-    //     index = index % x;
-    //     c.push_back(value);
-    // }
-    // c.push_back(index);
-    // NGRAPH_INFO << c;
-
     m_n_axes = source_shape.size();
 
     if (m_n_axes != source_start_corner.size())
@@ -195,6 +168,25 @@ CoordinateTransform::CoordinateTransform(const Shape& source_shape,
                                               source_start_corner[source_axis_order[axis]],
                                           source_strides[source_axis_order[axis]]));
     }
+
+    m_mapping_strides = std::vector<size_t>(source_shape.size() - 1);
+    size_t scale = 1;
+    for (size_t i = source_shape.size() - 1; i != 0; i--)
+    {
+        scale *= source_shape[i];
+        m_mapping_strides[i - 1] = scale;
+    }
+    NGRAPH_INFO << join(m_mapping_strides);
+    // size_t index = 33;
+    // Coordinate c;
+    // for (size_t x : m_mapping_strides)
+    // {
+    //     size_t value = index / x;
+    //     index = index % x;
+    //     c.push_back(value);
+    // }
+    // c.push_back(index);
+    // NGRAPH_INFO << c;
 }
 
 Strides CoordinateTransform::default_strides(size_t n_axes)

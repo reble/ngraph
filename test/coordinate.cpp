@@ -299,8 +299,10 @@ TEST(coordinate, dilation)
 
 TEST(benchmark, coordinate)
 {
-    // Shape source_shape{128, 3, 2000, 1000};
-    Shape source_shape{2, 3, 4, 5};
+    // Old 6488 on rkimball home computer
+    //
+    Shape source_shape{128, 3, 2000, 1000};
+    // Shape source_shape{2, 3, 4, 5};
     Coordinate source_start_corner = Coordinate{0, 0, 0, 0};
     Coordinate source_end_corner{source_shape};
     Strides source_strides = Strides(source_shape.size(), 1);

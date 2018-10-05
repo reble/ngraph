@@ -169,24 +169,17 @@ CoordinateTransform::CoordinateTransform(const Shape& source_shape,
                                           source_strides[source_axis_order[axis]]));
     }
 
-    // m_mapping_strides = std::vector<size_t>(source_shape.size() - 1);
-    // size_t scale = 1;
-    // for (size_t i = source_shape.size() - 1; i != 0; i--)
-    // {
-    //     scale *= source_shape[i];
-    //     m_mapping_strides[i - 1] = scale;
-    // }
-    // NGRAPH_INFO << join(m_mapping_strides);
-    // size_t index = 33;
-    // Coordinate c;
-    // for (size_t x : m_mapping_strides)
-    // {
-    //     size_t value = index / x;
-    //     index = index % x;
-    //     c.push_back(value);
-    // }
-    // c.push_back(index);
-    // NGRAPH_INFO << c;
+    if (m_target_shape.size() >= 1)
+    {
+        m_mapping_strides = std::vector<size_t>(m_target_shape.size() - 1);
+        size_t scale = 1;
+        for (size_t i = m_target_shape.size() - 1; i != 0; i--)
+        {
+            scale *= m_target_shape[i];
+            m_mapping_strides[i - 1] = scale;
+        }
+    }
+    NGRAPH_INFO << join(m_mapping_strides);
 }
 
 Strides CoordinateTransform::default_strides(size_t n_axes)
@@ -402,9 +395,11 @@ CoordinateTransform::Iterator::Iterator(const Shape& target_shape,
                                         bool is_end)
     : m_target_shape(target_shape)
     , m_mapping_strides(mapping_strides)
+    , m_index(is_end ? shape_size(target_shape) : 0)
 {
     // Initial coordinate is (0,...,0) in the target space.
     m_coordinate = Coordinate(target_shape.size(), 0);
+    NGRAPH_INFO << m_coordinate.size();
 
     // The case where we have a zero-length axis is a bit special, in that
     // the iterator always starts out of bounds.
@@ -422,55 +417,73 @@ CoordinateTransform::Iterator::Iterator(const Shape& target_shape,
     m_oob = is_end || m_empty;
 }
 
-void CoordinateTransform::Iterator::operator++()
+CoordinateTransform::Iterator& CoordinateTransform::Iterator::operator++()
 {
-    // If we are out of bounds, start over at (0,...0). (TODO: not sure if that's what we want. It
-    // might be best to stay put?)
-    if (m_oob)
+    m_index++;
+    recompute_coordinate();
+    return *this;
+    // // If we are out of bounds, start over at (0,...0). (TODO: not sure if that's what we want. It
+    // // might be best to stay put?)
+    // if (m_oob)
+    // {
+    //     std::fill(m_coordinate.begin(), m_coordinate.end(), 0);
+    //     m_oob = m_empty;
+    //     return;
+    // }
+
+    // // Increment the target coordinate.
+    // for (size_t axis = m_target_shape.size(); axis-- > 0;)
+    // {
+    //     m_coordinate[axis]++;
+
+    //     if (m_coordinate[axis] < m_target_shape[axis])
+    //     {
+    //         // No carry-out, so we are done.
+    //         return;
+    //     }
+    //     else
+    //     {
+    //         m_coordinate[axis] = 0;
+    //     }
+    // }
+
+    // // If we are still here there was carry-out from the most significant axis. We are now out of
+    // // bounds.
+    // m_oob = true;
+}
+
+void CoordinateTransform::Iterator::recompute_coordinate()
+{
+    if (m_coordinate.size() > 0)
     {
-        std::fill(m_coordinate.begin(), m_coordinate.end(), 0);
-        m_oob = m_empty;
-        return;
-    }
-
-    // Increment the target coordinate.
-    for (size_t axis = m_target_shape.size(); axis-- > 0;)
-    {
-        m_coordinate[axis]++;
-
-        if (m_coordinate[axis] < m_target_shape[axis])
+        size_t index = m_index;
+        size_t placement_index = 0;
+        for (size_t x : m_mapping_strides)
         {
-            // No carry-out, so we are done.
-            return;
+            size_t value = index / x;
+            index = index % x;
+            m_coordinate[placement_index++] = value;
         }
-        else
-        {
-            m_coordinate[axis] = 0;
-        }
+        m_coordinate[placement_index] = index;
     }
-
-    // If we are still here there was carry-out from the most significant axis. We are now out of
-    // bounds.
-    m_oob = true;
 }
 
 CoordinateTransform::Iterator CoordinateTransform::Iterator::operator++(int)
 {
-    CoordinateTransform::Iterator temp = *this;
-    ++(*this);
+    CoordinateTransform::Iterator temp(*this);
+    operator++();
     return temp;
 }
 
 void CoordinateTransform::Iterator::operator+=(size_t n)
 {
-    for (size_t i = 0; i < n; i++)
-    {
-        ++(*this);
-    }
+    m_index += n;
+    recompute_coordinate();
 }
 
 const Coordinate& CoordinateTransform::Iterator::operator*() const
 {
+    NGRAPH_INFO << m_coordinate;
     return m_coordinate;
 }
 
@@ -481,33 +494,5 @@ bool CoordinateTransform::Iterator::operator!=(const Iterator& it)
 
 bool CoordinateTransform::Iterator::operator==(const Iterator& it)
 {
-    if (m_target_shape != it.m_target_shape)
-    {
-        return false;
-    }
-
-    // Out-of-bounds iterators are always equal; in other words, an iterator is always equal to
-    // end() even if the internally stored coordinates are different.
-    if (m_oob && it.m_oob)
-    {
-        return true;
-    }
-
-    // If one iterator is out of bounds and the other is not, they are unequal even if their target
-    // coordinates happen to match.
-    if (m_oob != it.m_oob)
-    {
-        return false;
-    }
-
-    // Check axis-wise if the iterators are on the same target coordinate.
-    for (size_t axis = 0; axis < m_target_shape.size(); axis++)
-    {
-        if (m_coordinate[axis] != it.m_coordinate[axis])
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return m_index == it.m_index;
 }

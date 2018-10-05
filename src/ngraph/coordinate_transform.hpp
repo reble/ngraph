@@ -77,7 +77,7 @@ namespace ngraph
         public:
             Iterator(const Shape& target_shape, const Strides& mapping, bool is_end = false);
 
-            void operator++();
+            Iterator& operator++();
             Iterator operator++(int);
             void operator+=(size_t n);
             const Coordinate& operator*() const;
@@ -85,11 +85,13 @@ namespace ngraph
             bool operator==(const Iterator& it);
 
         private:
+            void recompute_coordinate();
             Shape m_target_shape;
             Strides m_mapping_strides;
             Coordinate m_coordinate;
             bool m_oob;
             bool m_empty;
+            size_t m_index;
         };
 
         Iterator begin() noexcept { return Iterator(m_target_shape, m_mapping_strides); }

@@ -179,7 +179,6 @@ CoordinateTransform::CoordinateTransform(const Shape& source_shape,
             m_mapping_strides[i - 1] = scale;
         }
     }
-    NGRAPH_INFO << join(m_mapping_strides);
 }
 
 Strides CoordinateTransform::default_strides(size_t n_axes)
@@ -399,7 +398,6 @@ CoordinateTransform::Iterator::Iterator(const Shape& target_shape,
 {
     // Initial coordinate is (0,...,0) in the target space.
     m_coordinate = Coordinate(target_shape.size(), 0);
-    NGRAPH_INFO << m_coordinate.size();
 
     // The case where we have a zero-length axis is a bit special, in that
     // the iterator always starts out of bounds.
@@ -483,7 +481,6 @@ void CoordinateTransform::Iterator::operator+=(size_t n)
 
 const Coordinate& CoordinateTransform::Iterator::operator*() const
 {
-    NGRAPH_INFO << m_coordinate;
     return m_coordinate;
 }
 

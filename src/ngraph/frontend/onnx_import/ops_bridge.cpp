@@ -96,29 +96,25 @@ namespace ngraph
 
             } // namespace error
 
-            class ops_bridge
+            class OperatorsBridge
             {
             public:
-                ops_bridge(const ops_bridge&) = delete;
-                ops_bridge& operator=(const ops_bridge&) = delete;
-                ops_bridge(ops_bridge&&) = delete;
-                ops_bridge& operator=(ops_bridge&&) = delete;
+                OperatorsBridge(const OperatorsBridge&) = delete;
+                OperatorsBridge& operator=(const OperatorsBridge&) = delete;
+                OperatorsBridge(OperatorsBridge&&) = delete;
+                OperatorsBridge& operator=(OperatorsBridge&&) = delete;
 
-                static NodeVector make_ng_nodes(const Node& node)
-                {
-                    return ops_bridge::get()(node);
-                }
-
+                static NodeVector make_ng_nodes(const Node& node) { return instance()(node); }
             private:
                 std::map<std::string, std::function<NodeVector(const Node&)>> m_map;
 
-                static const ops_bridge& get()
+                static const OperatorsBridge& instance()
                 {
-                    static ops_bridge instance;
+                    static OperatorsBridge instance;
                     return instance;
                 }
 
-                ops_bridge()
+                OperatorsBridge()
                 {
                     m_map.emplace("Abs", std::bind(op::abs, std::placeholders::_1));
                     m_map.emplace("Add", std::bind(op::add, std::placeholders::_1));
@@ -216,7 +212,7 @@ namespace ngraph
         {
             NodeVector make_ng_nodes(const Node& node)
             {
-                return detail::ops_bridge::make_ng_nodes(node);
+                return detail::OperatorsBridge::make_ng_nodes(node);
             }
 
         } // namespace ops_bridge

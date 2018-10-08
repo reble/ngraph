@@ -14,28 +14,22 @@
 // limitations under the License.
 //*****************************************************************************
 
-#include "attribute.hpp"
-#include "graph.hpp"
-#include "operator_set.hpp"
+#pragma once
+
+#include <functional>
+#include <unordered_map>
+
+#include "ngraph/node_vector.hpp"
 
 namespace ngraph
 {
     namespace onnx_import
     {
-        std::vector<Graph> Attribute::get_graph_array(const OperatorSet& opset) const
-        {
-            std::vector<Graph> result;
-            for (const auto& graph : m_attribute_proto->graphs())
-            {
-                result.emplace_back(graph, opset);
-            }
-            return result;
-        }
+        // Forward declaration
+        class Node;
 
-        Graph Attribute::get_graph(const OperatorSet& opset) const
-        {
-            return Graph{m_attribute_proto->g(), opset};
-        }
+        using Operator = std::function<NodeVector(const Node&)>;
+        using OperatorSet = std::unordered_map<std::string, std::reference_wrapper<const Operator>>;
 
     } // namespace onnx_import
 

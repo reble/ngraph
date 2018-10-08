@@ -30,6 +30,15 @@ namespace ngraph
             explicit Model(const onnx::ModelProto& model_proto)
                 : m_model_proto{&model_proto}
             {
+                for (const auto& id : m_model_proto->opset_import())
+                {
+                    // onnx.proto(.3): the empty string ("") or absence of this field implies
+                    // the operator set that is defined as part of the ONNX specification.
+                    if (id.domain().empty())
+                    {
+                        m_opset_version = id.version();
+                    }
+                }
             }
 
             Model(Model&&) noexcept = default;
@@ -46,8 +55,10 @@ namespace ngraph
                 return m_model_proto->producer_version();
             }
 
+            std::int64_t opset_version() const { return m_opset_version; }
         private:
             const onnx::ModelProto* m_model_proto;
+            std::int64_t m_opset_version{ONNX_OPSET_VERSION};
         };
 
         inline std::ostream& operator<<(std::ostream& outs, const Model& model)

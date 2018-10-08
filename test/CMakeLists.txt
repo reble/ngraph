@@ -88,8 +88,24 @@ add_subdirectory(util)
 # such as ${BACKEND_NAME} with their values, such as CPU, GPU, or INTERPRETER.
 set(MULTI_TEST_SRC
     autodiff.in.cpp
+    avg_pool.in.cpp
     backend_test.in.cpp
+    batchnorm.in.cpp
+    broadcast.in.cpp
     convolution_test.in.cpp
+    concat.in.cpp
+    dot.in.cpp
+    max_min.in.cpp
+    max_pool.in.cpp
+    pad.in.cpp
+    product.in.cpp
+    quantize.in.cpp
+    reduce_window.in.cpp
+    reshape.in.cpp
+    reverse.in.cpp
+    select_and_scatter.in.cpp
+    sum.in.cpp
+    topk.in.cpp
 )
 if(NGRAPH_DISTRIBUTED_ENABLE)
     set(MULTI_TEST_SRC ${MULTI_TEST_SRC} distributed.in.cpp)

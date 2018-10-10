@@ -21,6 +21,19 @@ namespace ngraph
 {
     namespace onnx_import
     {
+        namespace detail
+        {
+            std::string to_string(const std::vector<std::string>& vector)
+            {
+                std::string result;
+                for (std::size_t i{0}; i < vector.size(); ++i)
+                {
+                    result += (i != 0 ? ", " : "") + vector.at(i);
+                }
+                return result;
+            }
+        }
+
         Graph::Graph(const onnx::GraphProto& graph_proto, const OperatorSet& opset)
             : m_graph_proto{&graph_proto}
             , m_opset{&opset}
@@ -45,6 +58,20 @@ namespace ngraph
             {
                 m_outputs.emplace_back(output);
             }
+
+            // Verify that ONNX graph contains only nodes of available operator types
+            std::vector<std::string> unknown_operator_types;
+            for (const auto& node_ptoro : m_graph_proto->node())
+            {
+                auto it = m_opset->find(node_ptoro.op_type());
+                if (it == std::end(*m_opset))
+                {
+                    unknown_operator_types.push_back(node_ptoro.op_type());
+                }
+            }
+
+            NGRAPH_ASSERT(unknown_operator_types.empty())
+                << "unknown operators: " << detail::to_string(unknown_operator_types);
 
             // Process ONNX graph nodes, convert to nGraph nodes
             for (const auto& node_proto : m_graph_proto->node())

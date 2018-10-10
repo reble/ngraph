@@ -86,10 +86,10 @@ namespace ngraph
         {
             namespace error
             {
-                struct unknown_operation : ngraph_error
+                struct UnknownOperator : ngraph_error
                 {
-                    explicit unknown_operation(const std::string& op_type)
-                        : ngraph_error{"unknown operation: " + op_type}
+                    explicit UnknownOperator(const std::string& op_type)
+                        : ngraph_error{"unknown operator: \"" + op_type + "\""}
                     {
                     }
                 };
@@ -202,7 +202,7 @@ namespace ngraph
                     auto it = m_map.find(node.op_type());
                     if (it == m_map.end())
                     {
-                        throw detail::error::unknown_operation{node.op_type()};
+                        throw detail::error::UnknownOperator{node.op_type()};
                     }
 
                     std::function<NodeVector(const Node&)> factory{it->second};

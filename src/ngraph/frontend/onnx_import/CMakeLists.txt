@@ -18,8 +18,7 @@ set(ONNX_OPSET_VERSION 7 CACHE INTERNAL "")
 
 add_library(onnx_import_interface OBJECT
         onnx.cpp
-        onnx.hpp
-        weights.hpp)
+        onnx.hpp)
 
 target_include_directories(onnx_import_interface PRIVATE ${ONNX_PROTO_INCLUDE_DIR})
 

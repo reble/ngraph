@@ -22,7 +22,7 @@
 
 #include "ngraph/op/parameter_vector.hpp"
 
-#include "../weights.hpp"
+#include "../onnx.hpp"
 #include "value_info.hpp"
 
 namespace ngraph

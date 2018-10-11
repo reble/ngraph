@@ -16,7 +16,8 @@
 
 add_library(onnx_import_interface OBJECT
         onnx.cpp
-        onnx.hpp)
+        onnx.hpp
+        weights.hpp)
 
 target_include_directories(onnx_import_interface PRIVATE ${ONNX_PROTO_INCLUDE_DIR})
 

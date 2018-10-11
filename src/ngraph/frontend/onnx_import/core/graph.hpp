@@ -22,6 +22,7 @@
 
 #include "ngraph/op/parameter_vector.hpp"
 
+#include "../weights.hpp"
 #include "value_info.hpp"
 
 namespace ngraph
@@ -31,7 +32,7 @@ namespace ngraph
         class Graph
         {
         public:
-            explicit Graph(const onnx::GraphProto& proto);
+            explicit Graph(const onnx::GraphProto& proto, std::map<std::string, Weight> weights = {});
 
             const std::vector<Node>& get_nodes() const { return m_nodes; }
             const std::vector<ValueInfo>& get_inputs() const { return m_inputs; }
@@ -50,6 +51,7 @@ namespace ngraph
             std::vector<ValueInfo> m_outputs;
             op::ParameterVector m_parameters;
             std::map<std::string, std::shared_ptr<ngraph::Node>> m_ng_node_cache;
+            std::map<std::string, Weight> m_weights;
             std::map<std::string, Tensor> m_initializers;
         };
 
